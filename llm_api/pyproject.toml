@@ -8,6 +8,11 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi (>=0.121.0,<0.122.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "ollama (>=0.6.0,<0.7.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "prometheus-client (>=0.23.1,<0.24.0)"
 ]
 
 [tool.poetry]
