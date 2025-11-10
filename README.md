@@ -14,9 +14,11 @@ A API é construída com **FastAPI** e estruturada seguindo boas práticas de or
 - **pynvml** (opcional) para leitura de uso de GPU NVIDIA
 
 A API oferece:
-- Endpoint de chat para interação com o modelo (`/chat`)
-- Health Check completo com status do modelo e GPU (`/status`)
-- Métricas para monitoramento (`/metrics`)
+- Endpoint de chat para interação com o modelo (`api/chat`)
+- Health Check completo com status do modelo e GPU (`api/status`)
+- Métricas para monitoramento (`api/metrics`)
+
+Documentação Swagger (`/docs`)
 
 # Instruções para carregar o projeto com Poetry
 
