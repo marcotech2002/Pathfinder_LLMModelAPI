@@ -21,4 +21,6 @@
     ```
 
 5. **Execute o projeto conforme instruções específicas**
-    - Consulte a documentação ou o arquivo principal para saber como iniciar a aplicação.
+    ```bash
+    poetry run uvicorn src.llm_api.main:app --host 0.0.0.0 --port 8000 --reload
+    ```
