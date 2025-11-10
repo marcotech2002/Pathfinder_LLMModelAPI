@@ -8,7 +8,7 @@ class HealthCheckService:
         self.llm_service = llm_service
         self.start_time = start_time
 
-    def get_status(self):
+    async def get_status(self):
         status = {
             "status": "ok",
             "uptime_seconds": round(time.time() - self.start_time, 2),
@@ -18,6 +18,7 @@ class HealthCheckService:
         }
 
         try:
+            # agora retorna dict normal, não coroutine
             status["gpu"] = self._get_gpu_status()
         except GPUStatusError:
             status["gpu"] = None

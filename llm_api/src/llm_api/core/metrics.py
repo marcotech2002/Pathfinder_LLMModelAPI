@@ -4,22 +4,22 @@ import pynvml
 
 REQUEST_COUNT = Counter(
     "llm_requests_total",
-    "Número total de requisições ao modelo LLM"
+    "Total number of requests to the LLM model API"
 )
 
 REQUEST_LATENCY = Histogram(
     "llm_request_latency_seconds",
-    "Tempo de resposta do modelo LLM"
+    "Response time of the LLM model"
 )
 
 CPU_USAGE = Gauge(
     "system_cpu_usage_percent",
-    "Uso de CPU em porcentagem"
+    "CPU usage percentage"
 )
 
 GPU_USAGE = Gauge(
     "gpu_usage_percent",
-    "Uso de GPU em porcentagem (se disponível)"
+    "GPU usage percentage (if available)"
 )
 
 

@@ -5,11 +5,11 @@ class ChatRequest(BaseModel):
     """
     Definition of LLM model chat request
     """
-    mensagem: str
+    message: str
 
 
 class ChatResponse(BaseModel):
     """
     Definition of LLM model chat response
     """
-    resposta: str
+    response: str

@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Response
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from ..services.llm_service import LLMService
 from ..services.health_check_service import HealthCheckService
 from ..schemas.health_check import HealthCheckResponse
+from ..schemas.chat import ChatRequest, ChatResponse
 
 
 router = APIRouter()
@@ -26,11 +27,30 @@ def get_health_service(
     return HealthCheckService(llm_service, start_time)
 
 
+@router.post("/chat", response_model=ChatResponse, status_code=200)
+async def model_chat(
+    request: ChatRequest, llm_service: LLMService = Depends(get_llm_service)
+):
+    """
+    Main endpoint for model communication.
+    """
+    response_text = await llm_service.generate_response(request.message)
+    return response_text
+
+
+@router.get("/metrics")
+def get_application_metrics():
+    """
+    Endpoint to expose application metrics for monitoring.
+    """
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
 @router.get("/status", response_model=HealthCheckResponse)
-def health_check(service: HealthCheckService = Depends(get_health_service)):
-    status = service.get_status()
-
-    if status["status"] != "ok":
-        return JSONResponse(status_code=503, content=status)
-
-    return status
+async def get_health_check(
+    health_check_service: HealthCheckService = Depends(get_health_service)
+):
+    """
+    Endpoint to check the health status of the application.
+    """
+    return await health_check_service.get_status()
