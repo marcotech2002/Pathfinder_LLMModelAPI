@@ -2,19 +2,26 @@ import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import logging
+import time
 
 from .api.api_routes import router as chat_router
 from .api.exception_handlers import (
+    gpu_status_error_handler,
+    health_check_service_error_handler,
     llm_model_not_found_handler,
     llm_model_not_loaded_handler,
+    model_not_ready_handler,
     ollama_connection_error_handler,
     model_generation_error_handler,
     generic_llm_service_error_handler
 )
 from .core.exceptions import (
+    GPUStatusError,
+    HealthCheckServiceError,
     LLMServiceError,
     LLMModelNotFoundError,
     LLMModelNotLoadedError,
+    ModelNotReadyError,
     OllamaConnectionError,
     ModelGenerationError
 )
@@ -26,6 +33,7 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+START_TIME = time.time()
 
 llm_service = LLMService(model_name=settings.LLM_MODEL,
                          base_url=settings.OLLAMA_BASE_URL)
@@ -36,20 +44,21 @@ async def lifespan(app: FastAPI):
     """
     Application Lifespan context manager.
     """
-    logger.info(f"Iniciando a API. Carregando modelo: {settings.LLM_MODEL}")
+    logger.info(f"Starting API. Loading model: {settings.LLM_MODEL}")
     try:
         await llm_service.initialize_model()
-        logger.info(f"Modelo {settings.LLM_MODEL} carregado com sucesso.")
+        logger.info(f"Model {settings.LLM_MODEL} loaded successfully.")
     except Exception as e:
         logger.error(f"{e}")
     yield
-    logger.info("Encerrando a API.")
+    logger.info("Closing application.")
 
 
 app = FastAPI(
-    title="API para comunicação com modelo LLM local",
+    title="LLM Model API usage",
     description=(
-        "Sistema para utilização do modelo llama3 via requisições HTTP"
+        f"System for using the {settings.LLM_MODEL} model "
+        "via HTTP requests through Ollama."
     ),
     version="1.0.0",
     docs_url="/docs",
@@ -63,16 +72,13 @@ app.add_exception_handler(OllamaConnectionError,
                           ollama_connection_error_handler)
 app.add_exception_handler(ModelGenerationError, model_generation_error_handler)
 app.add_exception_handler(LLMServiceError, generic_llm_service_error_handler)
+app.add_exception_handler(ModelNotReadyError, model_not_ready_handler)
+app.add_exception_handler(GPUStatusError, gpu_status_error_handler)
+app.add_exception_handler(HealthCheckServiceError,
+                          health_check_service_error_handler)
+
 
 app.include_router(chat_router, prefix="/api")
-
-
-@app.get("/status")
-def health_check():
-    """
-    Endpoint to check the service status and if the model is loaded.
-    """
-    return {"status": "ok", "model_ready": llm_service.is_model_loaded()}
 
 
 if __name__ == "__main__":
